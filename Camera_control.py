@@ -4,6 +4,8 @@ import keyboard
 
 GPIO.setmode(GPIO.BCM)
 
+Led_pin = 15
+
 servo_pin_1 = 23
 servo_pin_2 = 24
 servo_pin_3 = 25
@@ -13,7 +15,7 @@ GPIO.setup(servo_pin_1, GPIO.OUT)
 GPIO.setup(servo_pin_2, GPIO.OUT)
 GPIO.setup(servo_pin_3, GPIO.OUT)
 GPIO.setup(servo_pin_4, GPIO.OUT)
-
+GPIO.setup(Led_pin, GPIO.OUT)
 
 pwm_servo1 = GPIO.PWM(servo_pin_1, 50)  
 pwm_servo2 = GPIO.PWM(servo_pin_2, 50)
@@ -40,6 +42,14 @@ def set_angle(pwm_servo, angle):
     pwm_servo.ChangeDutyCycle(duty)
     time.sleep(0.5)
     pwm_servo.ChangeDutyCycle(0)
+
+#Led settings (default is turned off)
+ledState = False
+
+def toggleLed():
+    global ledState
+    ledState = not ledState
+    GPIO.output(Led_pin, ledState)
 
 def Move_camera(Nr):
     if Nr not in servo_pwms:
@@ -87,6 +97,13 @@ def control_camera():
                     print("Please enter a valid camera number (1-4).")
             else:
                 Move_camera(Current_camera)
+
+            #Turn on led
+            if keyboard.is_pressed('t'):
+                toggleLed()
+            else:
+                continue
+                            
     except KeyboardInterrupt:
         print("\nExiting program...")
     finally:

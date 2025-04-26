@@ -44,7 +44,6 @@ def Drive_mode_1():
         time.sleep(2)
 
         while True:
-            
             if keyboard.is_pressed('w'):
                 if current_speed < 100:
                     current_speed += 5
