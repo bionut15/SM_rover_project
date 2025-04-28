@@ -3,7 +3,7 @@ import time
 
 GPIO.setmode(GPIO.BCM)  
 
-sensor_pins = [17, 27, 22, 23]  
+sensor_pins = [24, 25, 26, 27]  
 
 def Sensor_control():
     for pin in sensor_pins:

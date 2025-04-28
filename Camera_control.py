@@ -1,15 +1,22 @@
 import RPi.GPIO as GPIO
 import time
 import keyboard
+from adafruit_servokit import ServoKit
 
 GPIO.setmode(GPIO.BCM)
+kit = ServoKit(channels=16)
+
+# Set up servos on their respective channels
+CONT_SERVO_CHANNEL = 0
+SERVO180_CHANNEL = 1
+
 
 Led_pin = 15
 
-servo_pin_1 = 23
-servo_pin_2 = 24
-servo_pin_3 = 25
-servo_pin_4 = 5
+servo_pin_1 = 0
+servo_pin_2 = 1
+servo_pin_3 = 2
+servo_pin_4 = 3
 
 GPIO.setup(servo_pin_1, GPIO.OUT)
 GPIO.setup(servo_pin_2, GPIO.OUT)
@@ -37,11 +44,9 @@ servo_pwms = {
     4: pwm_servo4
 }
 
-def set_angle(pwm_servo, angle):
-    duty = 2 + (angle / 18)
-    pwm_servo.ChangeDutyCycle(duty)
+def set_angle( angle):
+    kit.servo[SERVO180_CHANNEL].angle = angle
     time.sleep(0.5)
-    pwm_servo.ChangeDutyCycle(0)
 
 #Led settings (default is turned off)
 ledState = False

@@ -1,10 +1,13 @@
 import RPi.GPIO as GPIO
 import time
 import keyboard
+from adafruit_servokit import ServoKit
+
+kit = ServoKit(channels=16)
+SERVO180_CHANNEL = 1
 
 #Servo setup
-servo_pin_left = 23
-servo_pin_left = 24
+servo_pin= 4
 pwm_servo = GPIO.PWM(servo_pin, 50)
 pwm_servo.start(0)
 
@@ -12,14 +15,12 @@ pwm_servo.start(0)
 default_angle=360/2
 
 def set_angle(angle):
-    duty = 2 + (angle / 18)
-    pwm_servo.ChangeDutyCycle(duty)
+    kit.servo[SERVO180_CHANNEL].angle = angle
     time.sleep(0.5)
-    pwm_servo.ChangeDutyCycle(0)
 
 #BLDC setup
 GPIO.setmode(GPIO.BCM)
-motor_pins = [17, 18, 27, 22]
+motor_pins = [8, 9, 10, 11]
 current_speed = 0
 
 pwms = []
@@ -76,4 +77,3 @@ def Drive_mode_1():
             pwm.stop()
         GPIO.cleanup()
         print("Motors stopped and GPIO cleaned up.")
-
