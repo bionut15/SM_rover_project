@@ -1,86 +1,57 @@
-import RPi.GPIO as GPIO
 import time
 import keyboard
+import RPi.GPIO as GPIO
 from adafruit_servokit import ServoKit
 
 GPIO.setmode(GPIO.BCM)
+
 kit = ServoKit(channels=16)
 
-# Set up servos on their respective channels
-CONT_SERVO_CHANNEL = 0
-SERVO180_CHANNEL = 1
+LED_PIN = 15
+GPIO.setup(LED_PIN, GPIO.OUT)
 
-
-Led_pin = 15
-
-servo_pin_1 = 0
-servo_pin_2 = 1
-servo_pin_3 = 2
-servo_pin_4 = 3
-
-GPIO.setup(servo_pin_1, GPIO.OUT)
-GPIO.setup(servo_pin_2, GPIO.OUT)
-GPIO.setup(servo_pin_3, GPIO.OUT)
-GPIO.setup(servo_pin_4, GPIO.OUT)
-GPIO.setup(Led_pin, GPIO.OUT)
-
-pwm_servo1 = GPIO.PWM(servo_pin_1, 50)  
-pwm_servo2 = GPIO.PWM(servo_pin_2, 50)
-pwm_servo3 = GPIO.PWM(servo_pin_3, 50)
-pwm_servo4 = GPIO.PWM(servo_pin_4, 50)
-
-pwm_servo1.start(0)
-pwm_servo2.start(0)
-pwm_servo3.start(0)
-pwm_servo4.start(0)
-
-default_angle = 180/2
+ledState = False
+SERVO_CHANNELS = {
+    1: 0,  
+    2: 1,  
+    3: 2,  
+    4: 3   
+}
+default_angle = 90
 Current_camera = 1
 
-servo_pwms = {
-    1: pwm_servo1,
-    2: pwm_servo2,
-    3: pwm_servo3,
-    4: pwm_servo4
-}
-
-def set_angle( angle):
-    kit.servo[SERVO180_CHANNEL].angle = angle
-    time.sleep(0.5)
-
-#Led settings (default is turned off)
-ledState = False
-
-def toggleLed():
+def toggle_led():
     global ledState
     ledState = not ledState
-    GPIO.output(Led_pin, ledState)
+    GPIO.output(LED_PIN, ledState)
 
-def Move_camera(Nr):
-    if Nr not in servo_pwms:
+def set_angle(channel, angle):
+    kit.servo[channel].angle = angle
+    time.sleep(0.2)
+
+def move_camera(camera_num):
+    if camera_num not in SERVO_CHANNELS:
         print("Invalid camera number!")
         return
 
-    pwm_servo = servo_pwms[Nr]
+    channel = SERVO_CHANNELS[camera_num]
     angle = default_angle
-    set_angle(pwm_servo, angle)
+    set_angle(channel, angle)
 
-    print(f"Control camera {Nr} with W  and S")
-    
+    print(f"Control camera {camera_num} with W (up) and S (down), ESC to exit.")
+
     try:
         while True:
-            if keyboard.is_pressed('w'):
-                if angle > 70:
-                    angle += 5
-                    set_angle(pwm_servo, angle)
-                    print(f"Moved up to {angle} degrees")
-                    time.sleep(0.2) 
-            elif keyboard.is_pressed('s'):
-                if angle < 70:
-                    angle -= 5
-                    set_angle(pwm_servo, angle)
-                    print(f"Moved down to {angle} degrees")
-                    time.sleep(0.2)
+            if keyboard.is_pressed('w') and angle < 180:
+                angle += 5
+                set_angle(channel, angle)
+                print(f"Moved up to {angle}°")
+                time.sleep(0.2)
+            elif keyboard.is_pressed('s') and angle > 0:
+                angle -= 5
+                set_angle(channel, angle)
+                print(f"Moved down to {angle}°")
+                time.sleep(0.2)
             elif keyboard.is_pressed('esc'):
                 print("Stopping camera movement...")
                 break
@@ -91,32 +62,27 @@ def control_camera():
     global Current_camera
     try:
         while True:
-            print(f"\nCurrent camera mode: {Current_camera}")
-            val = input("Change current camera (1-4), or press Enter to move current camera: ")
+            print(f"\nCurrent camera: {Current_camera}")
+            val = input("Enter camera number (1-4) or press Enter to move current camera: ")
             if val.isdigit():
                 cam = int(val)
                 if 1 <= cam <= 4:
                     Current_camera = cam
-                    print(f"Camera changed to {Current_camera}")
+                    print(f"Switched to camera {Current_camera}")
                 else:
-                    print("Please enter a valid camera number (1-4).")
+                    print("Invalid camera number. Choose 1-4.")
             else:
-                Move_camera(Current_camera)
+                move_camera(Current_camera)
 
-            #Turn on led
             if keyboard.is_pressed('t'):
-                toggleLed()
-            else:
-                continue
-                            
+                toggle_led()
+                print(f"LED {'ON' if ledState else 'OFF'}")
+
     except KeyboardInterrupt:
-        print("\nExiting program...")
+        print("\nExiting...")
     finally:
-        pwm_servo1.stop()
-        pwm_servo2.stop()
-        pwm_servo3.stop()
-        pwm_servo4.stop()
         GPIO.cleanup()
         print("GPIO cleaned up.")
 
+# Run main loop
 control_camera()
