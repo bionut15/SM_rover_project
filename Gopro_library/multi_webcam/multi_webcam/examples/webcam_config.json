@@ -1,11 +1,23 @@
 {
-    "992": {
+    "FrontCamera": {
         "port": 9000,
-        "resolution": 12,
+        "resolution": "1080p",
         "fov": 0
     },
-    "149": {
-        "resolution": 12,
+    "LeftCamera": {
+        "resolution": "1080p",
+        "fov": 0
+    },
+    "RightCamera": {
+        "resolution": "1080p",
+        "fov": 0
+    },
+    "BackCamera": {
+        "resolution": "1080p",
+        "fov": 0
+    },
+    "360Camera": {
+        "resolution": "1080p",
         "fov": 0
     }
 }
